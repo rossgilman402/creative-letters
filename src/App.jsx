@@ -8,6 +8,7 @@ const App = () => {
   const [userName, setUserName] = useState("");
   const [dateSent, setDateSent] = useState("");
   const [expireDate, setExpireDate] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const currentDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -24,6 +25,23 @@ const App = () => {
 
   const handleAddressChange = (e) => {
     setSelectedAddress(e.target.value);
+
+    switch (e.target.value) {
+      case "261 Gates Avenue":
+      case "277 Eastern Parkway":
+        setZipCode("11238");
+        break;
+      case "170 Fenimore Street":
+      case "209 Sullivan Place":
+        setZipCode("11225");
+        break;
+      case "323 East 9th Street":
+        setZipCode("11218");
+        break;
+      default:
+        setZipCode("");
+        break;
+    }
   };
 
   const handleApartmentChange = (e) => {
@@ -31,7 +49,11 @@ const App = () => {
   };
 
   const handleDateSentChange = (e) => {
-    setDateSent(e.target.value);
+    const localDate = new Date(e.target.value); // Get local date from input
+    const utcDate = new Date(
+      localDate.getTime() + localDate.getTimezoneOffset() * 60000
+    ); // Convert to UTC
+    setDateSent(utcDate.toISOString().split("T")[0]); // Set as UTC string in "yyyy-MM-dd" format
   };
 
   const handleExpireDateChange = (e) => {
@@ -40,13 +62,14 @@ const App = () => {
 
   const handleDownloadFile = () => {
     const formattedDateSent = new Date(dateSent).toLocaleDateString("en-US", {
+      timeZone: "UTC",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
     const formattedExpireDate = new Date(expireDate).toLocaleDateString(
       "en-US",
-      { year: "numeric", month: "long", day: "numeric" }
+      { timeZone: "UTC", year: "numeric", month: "long", day: "numeric" }
     );
 
     const inputTemplate = `
@@ -105,7 +128,7 @@ const App = () => {
         <p>${userName}</p>
         <p>${selectedAddress}</p>
         <p>Apartment ${apartmentNumber}</p>
-        <p>Brooklyn, New York 11238</p>
+        <p>Brooklyn, New York ${zipCode}</p>
         <br />
         <p>${currentDate}</p>
         <br />
@@ -120,7 +143,7 @@ const App = () => {
         this date, we have had no response. We are enclosing herewith, a duplicate set of said
         renewal lease forms and request that your immediate attention be given to the same. Your
         failure to do so may be grounds for "the commencement of an action by the owner to
-        evict you from your apartment.</p>
+        evict you from your apartment".</p>
         <p>Very truly yours,</p>
         <br />
         <br />
